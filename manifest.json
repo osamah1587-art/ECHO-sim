@@ -1,23 +1,30 @@
 {
  "name": "CCEeXAM Simulator \u00b7 ICU O.Dakka",
  "short_name": "CCEeXAM",
- "start_url": "./?app=cce2",
+ "start_url": "./?app=cce3",
  "display": "standalone",
  "background_color": "#0a1628",
  "theme_color": "#0a1628",
  "icons": [
   {
-   "src": "icon-192.png",
+   "src": "echo-icon-192.png",
    "sizes": "192x192",
-   "type": "image/png"
+   "type": "image/png",
+   "purpose": "any"
   },
   {
-   "src": "icon-512.png",
+   "src": "echo-icon-512.png",
    "sizes": "512x512",
    "type": "image/png",
    "purpose": "any"
+  },
+  {
+   "src": "echo-icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
   }
  ],
- "id": "./?app=cce2",
+ "id": "./?app=cce3",
  "scope": "./"
 }
