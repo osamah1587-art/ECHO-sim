@@ -1,7 +1,7 @@
 {
  "name": "CCEeXAM Simulator \u00b7 ICU O.Dakka",
  "short_name": "CCEeXAM",
- "start_url": "./index.html",
+ "start_url": "./?app=cce2",
  "display": "standalone",
  "background_color": "#0a1628",
  "theme_color": "#0a1628",
@@ -15,7 +15,9 @@
    "src": "icon-512.png",
    "sizes": "512x512",
    "type": "image/png",
-   "purpose": "any maskable"
+   "purpose": "any"
   }
- ]
+ ],
+ "id": "./?app=cce2",
+ "scope": "./"
 }
