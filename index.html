@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CCEeXAM Simulator</title>
+<meta name="description" content="NBE CCEeXAM practice simulator built from the SCCM Critical Care Echocardiography Review course">
+<meta name="theme-color" content="#0a1628">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#eef3f8;--card:#ffffff;--card2:#f4f8fc;--line:#d5e0ec;--fg:#0f1d2e;--muted:#5b6b80;
+  --accent:#0891b2;--accent2:#06b6d4;--accent-ink:#ffffff;--glow:rgba(8,145,178,.14);
+  --ok:#059669;--ok-bg:#e1f6ee;--bad:#dc2626;--bad-bg:#fde8e8;--warn:#d97706;--warn-bg:#fdf1de;
+  --f:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a1628;--card:#112240;--card2:#0d1b33;--line:#1e3556;--fg:#e6f1ff;--muted:#8da2bf;
+  --accent:#22d3ee;--accent2:#67e8f9;--accent-ink:#04212b;--glow:rgba(34,211,238,.12);
+  --ok:#34d399;--ok-bg:#0c3326;--bad:#f87171;--bad-bg:#3b1620;--warn:#fbbf24;--warn-bg:#3a2c0c;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1628;--card:#112240;--card2:#0d1b33;--line:#1e3556;--fg:#e6f1ff;--muted:#8da2bf;
+  --accent:#22d3ee;--accent2:#67e8f9;--accent-ink:#04212b;--glow:rgba(34,211,238,.12);
+  --ok:#34d399;--ok-bg:#0c3326;--bad:#f87171;--bad-bg:#3b1620;--warn:#fbbf24;--warn-bg:#3a2c0c;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--f);padding:16px 16px 72px;min-height:100vh}
+.w{max-width:900px;margin:0 auto}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+/* header */
+.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#0e4f7a);display:grid;place-items:center;color:#fff;font:800 15px/1 var(--f);letter-spacing:-.02em;flex:none}
+.brand h1{font-size:1.15rem;line-height:1.15;margin:0;font-weight:800;letter-spacing:-.01em}
+.brand p{margin:2px 0 0;font-size:.8rem;color:var(--muted)}
+.hd .actions{flex-wrap:nowrap}
+@media (max-width:420px){.brand p{display:none}}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;flex:none}
+.icon-btn svg{width:20px;height:20px}
+/* stat strip */
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.st{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.st b{display:block;font:700 1.25rem/1.1 var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st span{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.st.lvl b{font-family:var(--f);font-size:1.05rem;color:var(--accent)}
+@media (max-width:520px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* setup */
+h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 10px;font-weight:700}
+.sec{margin-bottom:18px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:1px solid var(--line);background:var(--card2);border-radius:999px;padding:7px 14px;font-size:.9rem;font-weight:500}
+.pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:620px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.dom{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.domh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;background:var(--card2);width:100%;border:0;text-align:left}
+.domh strong{font-size:.92rem}
+.wt{font:700 .78rem var(--mono);color:var(--accent);background:var(--glow);border-radius:6px;padding:2px 7px;flex:none}
+.tp{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.tp input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.tp .nm{font-size:.9rem}
+.tp .ct{font:500 .75rem var(--mono);color:var(--muted);white-space:nowrap}
+.tp .nm{cursor:pointer}.tstart{padding:6px 14px;font-size:.82rem}
+.tp .bar{grid-column:2/4;height:5px;border-radius:3px;background:var(--line);overflow:hidden;display:flex}
+.tp .bar i{display:block;height:100%}
+.tp .bar .g{background:var(--ok)}.tp .bar .r{background:var(--bad)}
+.lvlchip{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-left:6px}
+select{font:inherit;font-size:.9rem;background:var(--card2);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+.btn{border:1px solid var(--line);background:var(--card2);border-radius:10px;padding:10px 16px;font-weight:600;font-size:.92rem}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.warn{background:var(--warn-bg);border-color:transparent;color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.big-start{width:100%;padding:14px;font-size:1.02rem;border-radius:12px}
+.note{font-size:.82rem;color:var(--muted)}
+/* question */
+.qtop{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.74rem;font-weight:700;border-radius:6px;padding:3px 8px;background:var(--glow);color:var(--accent)}
+.tag.n{background:var(--card2);color:var(--muted);border:1px solid var(--line);font-weight:600}
+.tag.d1{background:var(--ok-bg);color:var(--ok)}.tag.d2{background:var(--warn-bg);color:var(--warn)}.tag.d3{background:var(--bad-bg);color:var(--bad)}
+.qno{font:700 .85rem var(--mono);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:4px 10px;white-space:nowrap}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.stem{font-size:1.05rem;font-weight:500;margin:0 0 14px;line-height:1.6}
+.figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:0 0 14px}
+.fig{border:1px solid var(--line);border-radius:10px;background:#000;padding:0;overflow:hidden;position:relative}
+.fig img{display:block;width:100%;height:170px;object-fit:contain}
+.fig span{position:absolute;left:6px;bottom:6px;font-size:.7rem;background:rgba(0,0,0,.7);color:#fff;border-radius:4px;padding:1px 6px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:var(--card2);border-radius:12px;padding:12px 14px;width:100%;transition:border-color .15s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font:700 .82rem var(--mono);background:var(--card);border:1px solid var(--line)}
+.opt.sel{border-color:var(--accent);background:var(--glow)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}.opt.right .k{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}.opt.wrong .k{background:var(--bad);color:#fff;border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.focus{margin-top:14px;border-left:4px solid var(--accent);background:var(--card2);border-radius:0 12px 12px 0;padding:12px 16px}
+.focus h3{margin:0 0 6px;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.focus .v{font-weight:800;margin-bottom:4px}.v.ok{color:var(--ok)}.v.no{color:var(--bad)}
+.focus p{margin:0}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+.nav .actions{gap:8px}
+.timer{font:700 .9rem var(--mono);color:var(--warn)}
+.streakpop{font-weight:700;color:var(--warn);font-size:.85rem}
+.pal{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px}
+.pal button{width:32px;height:30px;border-radius:7px;border:1px solid var(--line);background:var(--card2);font:600 .72rem var(--mono)}
+.pal .ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.pal .no{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.pal .a{background:var(--glow);border-color:var(--accent)}
+.pal .cur{outline:2px solid var(--accent);outline-offset:1px}
+.pal .f{box-shadow:inset 0 -3px 0 var(--warn)}
+/* results */
+.score{font:800 3.2rem/1 var(--mono);color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto}
+/* lightbox */
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.9);display:grid;place-items:center;padding:16px;z-index:50}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:92vh;border-radius:8px}
+/* ticker */
+.ticker{position:fixed;left:0;right:0;bottom:0;height:34px;background:#071120;border-top:1px solid #1e3556;overflow:hidden;z-index:40;display:flex;align-items:center}
+.ticker .tr{display:flex;white-space:nowrap;animation:tk 38s linear infinite;will-change:transform}
+.ticker span{color:#7dd3fc;font:600 .8rem var(--f);letter-spacing:.06em;padding-right:48px}
+.ticker b{color:#22d3ee}
+@keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.ticker .tr{animation:none}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="w">
+  <header class="hd">
+    <div class="brand"><div class="logo" aria-hidden="true">O.D</div><div><h1>CCEeXAM Simulator</h1><p>ICU O.Dakka · NBE blueprint · SCCM Review 2024</p></div></div>
+    <div class="actions" style="gap:8px">
+      <button class="icon-btn" id="home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
+      <button class="icon-btn" id="theme" aria-label="Toggle dark or light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </header>
+  <div class="strip">
+    <div class="st"><b id="sDone">0</b><span>Answered</span></div>
+    <div class="st"><b id="sPct">–</b><span>Accuracy</span></div>
+    <div class="st"><b id="sStreak">0</b><span>Streak · best <em id="sBest" style="font-style:normal">0</em></span></div>
+    <div class="st lvl"><b id="sLvl">Beginner</b><span id="sLvlNext">Mastery</span></div>
+  </div>
+  <main id="app"></main>
+</div>
+<div class="lb" id="lb" hidden role="dialog" aria-label="Enlarged figure"><img id="lbImg" alt="Enlarged figure"></div>
+<div class="ticker" aria-hidden="true"><div class="tr" id="tk"></div></div>
+<script src="data.js"></script>
+<script>
+const LT='ABCDE';
+const BP=[
+ {id:'D1',name:'TTE & TEE',w:'50%',topics:[['views','Views & image acquisition'],['lv','LV systolic function & wall motion'],['dia','LV diastolic function'],['rv','RV & pulmonary pressures'],['valve','Valves & prostheses'],['peri','Pericardial disease'],['mass','Masses, aorta, shunts & devices']]},
+ {id:'D2',name:'Physics',w:'25%',topics:[['phys','Ultrasound principles & instrumentation'],['dop','Doppler principles'],['art','Artifacts']]},
+ {id:'D3',name:'Other applications',w:'25%',topics:[['hemo','Hemodynamics & cardiac output'],['fluid','Preload & fluid responsiveness'],['shock','Shock & cardiac arrest'],['lung','Lung & pleural ultrasound'],['vasc','Vascular, DVT & procedures'],['abd','FAST, abdomen & trauma']]}
+];
+const TOPIC={};BP.forEach((d,di)=>d.topics.forEach(([k,n],ti)=>TOPIC[k]={k,n,d,order:di*10+ti}));
+Q.forEach((x,i)=>{
+  x.i=i;
+  if(x.lec){x.id='L'+x.lec+'_'+x.n;x.fq=[];x.fe=[];x.img=0}
+  else{x.id=(x.src==='Practice'?'P':'T')+x.n;x.d=2;const m=IMG[(x.src==='Practice'?'P':'T')+x.n]||{q:[],e:[]};x.fq=m.q;x.fe=m.e;x.img=m.q.length?1:0}
+});
+const OPTFIG=new Set(['P57','P114']);
+const ORDERED=[...Q].sort((a,b)=>TOPIC[a.t].order-TOPIC[b.t].order||(b.img-a.img)||a.i-b.i);
+const TN={};ORDERED.forEach(x=>{TN[x.t]=(TN[x.t]||0)+1;x.tn=TN[x.t]});
+const LEVELS=[[0,'Beginner'],[60,'Intermediate'],[180,'Advanced'],[350,'Expert']];
+const KEY='cce_sim_v2';
+let S={hist:{},flags:{},streak:0,best:0};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let cfg={count:20,src:'all',diff:'all',mode:'tutor',order:'bp',status:'all',topics:new Set(Object.keys(TOPIC))};
+try{const c=JSON.parse(localStorage.getItem(KEY+'_cfg')||'null');if(c){Object.assign(cfg,c);cfg.topics=new Set(c.topics);if(!['all','img','txt'].includes(cfg.src))cfg.src='all'}}catch(e){}
+function saveCfg(){try{localStorage.setItem(KEY+'_cfg',JSON.stringify({...cfg,topics:[...cfg.topics]}))}catch(e){}}
+let sess=null,timerId=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':':'')+String(m).padStart(h?2:1,'0')+':'+String(x).padStart(2,'0')};
+function topicStat(k){const qs=Q.filter(x=>x.t===k),att=qs.filter(x=>S.hist[x.id]),ok=att.filter(x=>S.hist[x.id].c).length;return{n:qs.length,att:att.length,ok,acc:att.length?ok/att.length:null}}
+function tLevel(st){if(st.att<3)return'';const a=st.acc;return a>=.9?'Expert':a>=.75?'Advanced':a>=.55?'Intermediate':'Beginner'}
+function stats(){
+  const h=Object.values(S.hist),done=h.length,ok=h.filter(x=>x.c).length;
+  $('sDone').textContent=done+'/'+Q.length;$('sPct').textContent=done?Math.round(100*ok/done)+'%':'–';
+  $('sStreak').textContent=S.streak;$('sBest').textContent=S.best;
+  let li=0;LEVELS.forEach((l,i)=>{if(ok>=l[0])li=i});
+  $('sLvl').textContent=LEVELS[li][1];
+  $('sLvlNext').textContent=li<LEVELS.length-1?(LEVELS[li+1][0]-ok)+' correct to '+LEVELS[li+1][1]:'Top level';
+}
+function weakTopics(){return Object.keys(TOPIC).map(k=>[k,topicStat(k)]).filter(([k,s])=>s.att>=3&&s.acc<.7).sort((a,b)=>a[1].acc-b[1].acc).map(x=>x[0])}
+function pool(over){
+  const c=Object.assign({},cfg,over||{});
+  let p=ORDERED.filter(x=>c.topics.has(x.t));
+  if(c.src==='img')p=p.filter(x=>x.img);else if(c.src==='txt')p=p.filter(x=>!x.img);
+  if(c.diff!=='all')p=p.filter(x=>x.d===+c.diff);
+  if(c.status==='new')p=p.filter(x=>!S.hist[x.id]);
+  else if(c.status==='wrong')p=p.filter(x=>S.hist[x.id]&&!S.hist[x.id].c);
+  else if(c.status==='flag')p=p.filter(x=>S.flags[x.id]);
+  return p;
+}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pick(p,n){
+  if(n==='all'||p.length<=n)return cfg.order==='rnd'?shuffle(p):p;
+  const s=shuffle(p).slice(0,n);
+  return cfg.order==="rnd"?s:s.sort((a,b)=>TOPIC[a.t].order-TOPIC[b.t].order||a.tn-b.tn);
+}
+function pills(name,opts,cur){return `<div class="seg" role="group" aria-label="${name}">`+opts.map(([v,l])=>`<button class="pill" data-k="${name}" data-v="${v}" aria-pressed="${String(cur)===String(v)}">${l}</button>`).join('')+'</div>'}
+function home(){
+  clearInterval(timerId);sess=null;stats();
+  const p=pool();const n=cfg.count==='all'?p.length:Math.min(+cfg.count,p.length);const weak=weakTopics();
+  let h=`<div class="card">
+  <div class="grid2">
+   <div class="sec"><h2>Number of questions</h2>${pills('count',[[5,'5'],[10,'10'],[20,'20'],[50,'50'],['all','All']],cfg.count)}</div>
+   <div class="sec"><h2>Mode</h2>${pills('mode',[['tutor','Tutor'],['exam','Timed exam']],cfg.mode)}<p class="note" style="margin:8px 0 0">${cfg.mode==='tutor'?'Answer and Focus shown after each question.':'81 s per question (NBE pace); review at the end.'}</p></div>
+   <div class="sec"><h2>Difficulty</h2>${pills('diff',[['all','All'],[1,'Easy'],[2,'Medium'],[3,'Hard']],cfg.diff)}</div>
+   <div class="sec"><h2>Order</h2>${pills('order',[['bp','Blueprint'],['rnd','Random']],cfg.order)}</div>
+   <div class="sec"><h2>Question type</h2>${pills('src',[['all','All'],['img','With images'],['txt','Text only']],cfg.src)}</div>
+   <div class="sec"><h2>Status</h2><select id="fStatus" aria-label="Question status">
+     ${[['all','All questions'],['new','Unanswered only'],['wrong','Previously wrong'],['flag','Flagged']].map(([v,l])=>`<option value="${v}" ${cfg.status===v?'selected':''}>${l}</option>`).join('')}</select></div>
+  </div>
+  <button class="btn pri big-start" id="go" ${n?'':'disabled'}>Start mixed session · ${n} question${n===1?'':'s'} from ${cfg.topics.size} topic${cfg.topics.size===1?'':'s'}</button>
+  <div class="actions" style="margin-top:10px">
+   <button class="btn warn" id="weak" ${weak.length?'':'disabled'}>Practice weak topics${weak.length?' ('+weak.length+')':''}</button>
+   <button class="btn" id="allT">Select all topics</button><button class="btn" id="noT">Clear topics</button>
+  </div>
+  ${weak.length?'':'<p class="note" style="margin:8px 0 0">Weak topics unlock after 3+ answers in a topic with accuracy under 70%.</p>'}
+  </div>
+  <div class="card" style="margin-top:14px"><h2>Topics · NBE blueprint</h2><p class="note" style="margin:-4px 0 12px">Tap <b>Start</b> to practise one topic (uses the session settings below). Tick topics to build a mixed session.</p>`;
+  BP.forEach(d=>{
+    h+=`<div class="dom"><button class="domh" data-dom="${d.id}"><strong>${d.id.slice(1)}. ${esc(d.name)}</strong><span class="wt">${d.w}</span></button>`;
+    d.topics.forEach(([k,nm])=>{const s=topicStat(k),g=s.n?100*s.ok/s.n:0,r=s.n?100*(s.att-s.ok)/s.n:0,lv=tLevel(s);
+      const avail=pool({topics:new Set([k])}).length;
+      h+=`<div class="tp"><input type="checkbox" data-t="${k}" id="cb_${k}" ${cfg.topics.has(k)?'checked':''} aria-label="Include ${esc(nm)} in mixed session"><label class="nm" for="cb_${k}">${esc(nm)}${lv?`<span class="lvlchip">${lv}</span>`:''}<span class="ct" style="display:block">${s.n} questions · ${s.att} done${s.att?' · '+Math.round(100*s.acc)+'%':''}</span></label><button class="btn tstart" data-start="${k}" ${avail?'':'disabled'}>Start</button><span class="bar" aria-hidden="true"><i class="g" style="width:${g}%"></i><i class="r" style="width:${r}%"></i></span></div>`});
+    h+='</div>'});
+  h+=`<p class="note">Domain weights from the NBE CCEeXAM content outline. ${Q.length} questions across 16 topics, drawn from the SCCM review course material and all lecture slides.</p>
+  <div class="actions"><button class="btn" id="reset">Reset progress</button><span class="note" id="resetNote" hidden>Tap again within 4 s to erase all progress.</span></div></div>`;
+  {const m='<div class="card" style="margin-top:14px"><h2>Topics';const k=h.indexOf(m);h=h.slice(k).replace('margin-top:14px','margin-bottom:14px')+h.slice(0,k).replace('<div class="card">','<div class="card"><h2 style="font-size:.9rem;color:var(--fg)">Session settings</h2>');}
+  $('app').innerHTML=h;
+  $('app').querySelectorAll('.pill').forEach(b=>b.onclick=()=>{let v=b.dataset.v;if(b.dataset.k==='count'&&v!=='all')v=+v;cfg[b.dataset.k]=v;saveCfg();home()});
+  $('fStatus').onchange=e=>{cfg.status=e.target.value;saveCfg();home()};
+  $('app').querySelectorAll('input[data-t]').forEach(c=>c.onchange=()=>{c.checked?cfg.topics.add(c.dataset.t):cfg.topics.delete(c.dataset.t);saveCfg();home()});
+  $('app').querySelectorAll('.domh').forEach(el=>el.onclick=()=>{const ks=BP.find(x=>x.id===el.dataset.dom).topics.map(t=>t[0]);const all=ks.every(k=>cfg.topics.has(k));ks.forEach(k=>all?cfg.topics.delete(k):cfg.topics.add(k));saveCfg();home()});
+  $('allT').onclick=()=>{cfg.topics=new Set(Object.keys(TOPIC));saveCfg();home()};
+  $('noT').onclick=()=>{cfg.topics=new Set();saveCfg();home()};
+  $('app').querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>start(pick(pool({topics:new Set([b.dataset.start])}),cfg.count==='all'?'all':+cfg.count)));
+  $('go').onclick=()=>start(pick(p,cfg.count==='all'?'all':+cfg.count));
+  $('weak').onclick=()=>{const wp=pool({topics:new Set(weak),status:'all'});const pr=wp.filter(x=>!S.hist[x.id]||!S.hist[x.id].c);start(pick(pr.length>=5?pr:wp,cfg.count==='all'?'all':+cfg.count))};
+  let armed=false;$('reset').onclick=()=>{if(!armed){armed=true;$('resetNote').hidden=false;setTimeout(()=>{armed=false;const n=$('resetNote');if(n)n.hidden=true},4000);return}S={hist:{},flags:{},streak:0,best:0};save();home()};
+}
+function start(list){
+  if(!list.length)return;
+  sess={list,idx:0,ans:{},mode:cfg.mode,end:cfg.mode==='exam'?Date.now()+list.length*81000:0,done:false};
+  clearInterval(timerId);if(sess.mode==='exam')timerId=setInterval(tick,1000);
+  renderQ();window.scrollTo(0,0);
+}
+function tick(){if(!sess||sess.done||sess.mode!=='exam')return;const left=(sess.end-Date.now())/1000;const t=$('timer');if(t)t.textContent=fmt(left);if(left<=0)finish()}
+function record(x,a){const c=a===x.ans;S.hist[x.id]={a,c,t:Date.now()};if(c){S.streak++;S.best=Math.max(S.best,S.streak)}else S.streak=0;save();stats()}
+function choose(a){
+  const x=sess.list[sess.idx];
+  if(sess.mode==='tutor'){if(x.id in sess.ans)return;sess.ans[x.id]=a;record(x,a)}
+  else{if(sess.done)return;sess.ans[x.id]=a}
+  renderQ();
+}
+function figs(list,id,lettered){return list.length?'<div class="figs">'+list.map((f,i)=>`<button class="fig" data-src="${f}"><img src="${f}" loading="lazy" alt="Figure ${i+1} for question ${id}"><span>${lettered?'Option '+LT[i]:'Fig '+(i+1)}</span></button>`).join('')+'</div>':''}
+function renderQ(){
+  const x=sess.list[sess.idx],T=TOPIC[x.t],a=sess.ans[x.id],reveal=(sess.mode==='tutor'&&a!==undefined)||sess.done,last=sess.idx===sess.list.length-1;
+  const answered=Object.keys(sess.ans).length;
+  let h=`<div class="card"><div class="qtop"><div class="tags"><span class="tag">${esc(T.n)}</span><span class="tag n">#${x.tn} of ${TN[x.t]}</span><span class="tag d${x.d}">${['','Easy','Medium','Hard'][x.d]}</span>${x.img?'<span class="tag n">Figure</span>':''}</div>
+   <div class="actions" style="gap:10px">${sess.mode==='exam'&&!sess.done?'<span class="timer" id="timer"></span>':''}<span class="qno">Q${sess.idx+1}/${sess.list.length}</span></div></div>
+   <div class="prog" aria-hidden="true"><i style="width:${100*answered/sess.list.length}%"></i></div>
+   <p class="stem">${esc(x.stem)}</p>${figs(x.fq,x.id,OPTFIG.has(x.id))}
+   <div class="opts" role="group" aria-label="Answer options">`;
+  x.opts.forEach((o,i)=>{let c='opt';if(reveal){if(i===x.ans)c+=' right';else if(i===a)c+=' wrong'}else if(i===a)c+=' sel';
+    h+=`<button class="${c}" data-i="${i}" ${reveal?'disabled':''}><span class="k">${LT[i]}</span><span>${esc(o)}</span></button>`});
+  h+='</div>';
+  if(reveal){const ok=a===x.ans;h+=`<div class="focus"><h3>Focus</h3><div class="v ${a===undefined?'':ok?'ok':'no'}">${a===undefined?'Not answered':ok?'Correct':'Incorrect'} · Answer ${LT[x.ans]}${ok&&sess.mode==='tutor'&&S.streak>=3?` <span class="streakpop">· ${S.streak} in a row</span>`:''}</div><p>${esc(x.exp)}</p>${figs(x.fe,x.id,false).replace('class="figs"','class="figs" style="margin:12px 0 0"')}</div>`}
+  h+=`<div class="nav"><div class="actions"><button class="btn" id="prev" ${sess.idx?'':'disabled'}>← Prev</button><button class="btn" id="flag" aria-pressed="${!!S.flags[x.id]}">${S.flags[x.id]?'Flagged':'Flag'}</button></div>
+   <div class="actions">${sess.done?'<button class="btn" id="toRes">Results</button>':'<button class="btn" id="end">End</button>'}<button class="btn pri" id="next" ${last&&sess.done?'disabled':''}>${last?(sess.done?'Last':'Finish'):'Next →'}</button></div></div>`;
+  h+='<div class="pal" aria-label="Question navigator">'+sess.list.map((q,i)=>{let c='';const aa=sess.ans[q.id];if(aa!==undefined)c=(sess.mode==='tutor'||sess.done)?(aa===q.ans?'ok':'no'):'a';if(i===sess.idx)c+=' cur';if(S.flags[q.id])c+=' f';return `<button class="${c}" data-j="${i}" aria-label="Question ${i+1}">${i+1}</button>`}).join('')+'</div></div>';
+  $('app').innerHTML=h;
+  $('app').querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+  $('app').querySelectorAll('.fig').forEach(b=>b.onclick=()=>{$('lbImg').src=b.dataset.src;$('lb').hidden=false});
+  $('app').querySelectorAll('.pal button').forEach(b=>b.onclick=()=>{sess.idx=+b.dataset.j;renderQ()});
+  $('prev').onclick=()=>{sess.idx--;renderQ()};
+  $('next').onclick=()=>{if(last){if(!sess.done)finish()}else{sess.idx++;renderQ();window.scrollTo(0,0)}};
+  $('flag').onclick=()=>{S.flags[x.id]?delete S.flags[x.id]:S.flags[x.id]=1;save();renderQ()};
+  if($('end'))$('end').onclick=finish;
+  if($('toRes'))$('toRes').onclick=renderRes;
+  tick();
+}
+function finish(){
+  if(!sess)return;clearInterval(timerId);
+  if(sess.mode==='exam'&&!sess.done)sess.list.forEach(x=>{if(sess.ans[x.id]!==undefined)record(x,sess.ans[x.id])});
+  sess.done=true;renderRes();
+}
+function renderRes(){
+  const l=sess.list,ans=l.filter(x=>sess.ans[x.id]!==undefined),ok=ans.filter(x=>sess.ans[x.id]===x.ans);
+  const rows=[];BP.forEach(d=>d.topics.forEach(([k,n])=>{const qs=l.filter(x=>x.t===k);if(!qs.length)return;const c=qs.filter(x=>sess.ans[x.id]===x.ans).length;rows.push([d,n,qs.length,c])}));
+  const weak=rows.filter(r=>r[2]>=2&&r[3]/r[2]<.6).map(r=>r[1]);const pct=l.length?Math.round(100*ok.length/l.length):0;
+  $('app').innerHTML=`<div class="card"><h2>Session results</h2><div class="score">${pct}%</div><p class="note">${ok.length} correct of ${l.length}${l.length-ans.length?' · '+(l.length-ans.length)+' unanswered':''} · ${pct>=70?'At or above the ~70% target.':'Below the ~70% target.'}</p>
+  ${weak.length?`<p>Below 60%: <b>${weak.map(esc).join(', ')}</b>.</p>`:''}
+  <div class="tw"><table><thead><tr><th>Domain</th><th>Topic</th><th class="n">Correct</th><th class="n">%</th></tr></thead><tbody>
+  ${rows.map(([d,n,t,c])=>`<tr><td>D${d.id.slice(1)}</td><td>${esc(n)}</td><td class="n">${c}/${t}</td><td class="n">${Math.round(100*c/t)}%</td></tr>`).join('')}</tbody></table></div>
+  <div class="nav"><button class="btn" id="review">Review answers</button><button class="btn pri" id="again">New session</button></div></div>`;
+  $('review').onclick=()=>{sess.idx=0;renderQ()};
+  $('again').onclick=home;window.scrollTo(0,0);
+}
+/* theme */
+function applyTheme(t){if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.removeAttribute('data-theme')}
+let th=null;try{th=localStorage.getItem('cce_theme')}catch(e){}applyTheme(th);
+$('theme').onclick=()=>{const cur=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');const nx=cur==='dark'?'light':'dark';applyTheme(nx);try{localStorage.setItem('cce_theme',nx)}catch(e){}};
+$('home').onclick=()=>{if(sess&&!sess.done&&Object.keys(sess.ans).length&&!confirm('Leave this session? Answers already recorded are kept.'))return;home()};
+$('lb').onclick=()=>{$('lb').hidden=true};
+document.addEventListener('keydown',e=>{
+  if(!$('lb').hidden){if(e.key==='Escape')$('lb').hidden=true;return}
+  if(!sess||!$('next')||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;
+  const k=e.key.toUpperCase(),x=sess.list[sess.idx];
+  if(k.length===1&&LT.includes(k)&&LT.indexOf(k)<x.opts.length&&!sess.done)choose(LT.indexOf(k));
+  else if(e.key==='ArrowRight'&&!$('next').disabled)$('next').click();
+  else if(e.key==='ArrowLeft'&&sess.idx>0)$('prev').click();
+  else if(k==='F')$('flag').click();
+});
+/* ticker */
+(function(){const t=`<span><b>ICU O.Dakka</b> · CCEeXAM Simulator · Osama Hosni Abdelhady Dakka · Critical Care Medicine · ${Q.length} Questions</span>`;$('tk').innerHTML=t.repeat(4)+t.repeat(4)})();
+/* PWA */
+if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude/.test(location.hostname)){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+home();
+</script>
+</body>
+</html>
